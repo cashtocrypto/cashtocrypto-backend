@@ -90,6 +90,56 @@ app.post('/api/submit', (req, res) => {
     writeData(data);
 
     console.log(`[SUBMIT] New submission: ${id} | ${email} | ${coin} on ${network}`);
+
+    // Notify admin
+    try {
+      await resend.emails.send({
+        from: process.env.FROM_EMAIL || 'noreply@cashtocrypto.online',
+        to: 'Kkdabby76@gmail.com',
+        subject: '🔔 New Verification Submission — CashToCrypto',
+        html: `
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"/></head>
+<body style="background:#080b12;color:#e2eaff;font-family:'Courier New',monospace;margin:0;padding:0;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#080b12;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#0d1120;border:1px solid rgba(99,179,255,0.15);border-radius:16px;overflow:hidden;max-width:600px;width:100%;">
+        <tr>
+          <td style="background:linear-gradient(135deg,#1e3a8a,#0e7490);padding:32px 40px;text-align:center;">
+            <h1 style="margin:0;font-size:1.5rem;color:#fff;letter-spacing:-0.02em;">CashToCrypto Admin</h1>
+            <p style="margin:8px 0 0;color:rgba(255,255,255,0.7);font-size:0.85rem;">New Verification Submission</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:40px;">
+            <p style="color:#fbbf24;font-size:1.1rem;margin:0 0 20px;">🔔 New submission received!</p>
+            <table style="width:100%;border-collapse:collapse;">
+              <tr><td style="padding:10px 0;border-bottom:1px solid rgba(99,179,255,0.1);color:#6b7a99;font-size:0.8rem;width:40%;">Email</td><td style="padding:10px 0;border-bottom:1px solid rgba(99,179,255,0.1);color:#e2eaff;font-size:0.8rem;">${email}</td></tr>
+              <tr><td style="padding:10px 0;border-bottom:1px solid rgba(99,179,255,0.1);color:#6b7a99;font-size:0.8rem;">Coin</td><td style="padding:10px 0;border-bottom:1px solid rgba(99,179,255,0.1);color:#e2eaff;font-size:0.8rem;">${coin}</td></tr>
+              <tr><td style="padding:10px 0;border-bottom:1px solid rgba(99,179,255,0.1);color:#6b7a99;font-size:0.8rem;">Network</td><td style="padding:10px 0;border-bottom:1px solid rgba(99,179,255,0.1);color:#e2eaff;font-size:0.8rem;">${network}</td></tr>
+              <tr><td style="padding:10px 0;color:#6b7a99;font-size:0.8rem;">Wallet</td><td style="padding:10px 0;color:#e2eaff;font-size:0.8rem;word-break:break-all;">${walletAddress}</td></tr>
+            </table>
+            <div style="text-align:center;margin:32px 0 0;">
+              <a href="https://patient-passion-production-3624.up.railway.app/admin" style="background:linear-gradient(135deg,#2563eb,#0891b2);color:#fff;text-decoration:none;padding:14px 36px;border-radius:10px;font-size:1rem;display:inline-block;">Review in Admin Panel →</a>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="border-top:1px solid rgba(99,179,255,0.1);padding:20px 40px;text-align:center;">
+            <p style="color:#6b7a99;font-size:0.72rem;margin:0;">© 2024 CashToCrypto</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+      });
+    } catch (emailErr) {
+      console.error('[ADMIN NOTIFY ERROR]', emailErr);
+    }
+
     return res.status(201).json({ success: true, id });
 
   } catch (err) {
