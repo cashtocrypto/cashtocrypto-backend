@@ -46,7 +46,7 @@ function adminAuth(req, res, next) {
 }
 
 // ── POST /api/submit ──
-app.post('/api/submit', (req, res) => {
+app.post('/api/submit', async (req, res) => {
   try {
     const { email, coin, network, walletAddress, image } = req.body;
 
