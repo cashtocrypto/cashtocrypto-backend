@@ -48,7 +48,7 @@ function adminAuth(req, res, next) {
 // ── POST /api/submit ──
 app.post('/api/submit', async (req, res) => {
   try {
-    const { email, coin, network, walletAddress, image } = req.body;
+    const { email, coin, network, walletAddress, amount, image } = req.body;
 
     if (!email || !coin || !network || !walletAddress || !image) {
       return res.status(400).json({ error: 'Missing required fields: email, coin, network, walletAddress, image' });
@@ -80,6 +80,7 @@ app.post('/api/submit', async (req, res) => {
       email,
       coin,
       network,
+      amount: amount || '',
       walletAddress,
       imagePath: `/uploads/${filename}`,
       status: 'pending',
@@ -91,7 +92,23 @@ app.post('/api/submit', async (req, res) => {
 
     console.log(`[SUBMIT] New submission: ${id} | ${email} | ${coin} on ${network}`);
 
-    // Notify admin
+    // Telegram notification
+    try {
+      const tgMessage = `🔔 *New CashToCrypto Submission!*\n\n📧 *Email:* ${email}\n🪙 *Coin:* ${coin}\n🌐 *Network:* ${network}\n💰 *Amount:* $${amount || 'N/A'}\n👛 *Wallet:* \`${walletAddress}\`\n\n👉 [Review in Admin Panel](https://patient-passion-production-3624.up.railway.app/admin)`;
+      await fetch(`https://api.telegram.org/bot8729703760:AAHP3n5vkUUATVwxdDMez70ujVVvvvUN59M/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: '8189413900',
+          text: tgMessage,
+          parse_mode: 'Markdown'
+        })
+      });
+    } catch (tgErr) {
+      console.error('[TELEGRAM NOTIFY ERROR]', tgErr);
+    }
+
+    // Notify admin via email
     try {
       await resend.emails.send({
         from: process.env.FROM_EMAIL || 'noreply@cashtocrypto.online',
